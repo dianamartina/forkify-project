@@ -1,0 +1,52 @@
+var _modelJs = require('./model.js');
+var _viewRecipeView = require('./view/recipeView');
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+var _viewRecipeViewDefault = _parcelHelpers.interopDefault(_viewRecipeView);
+var _urlImgIconsSvg = require('url:../img/icons.svg');
+var _urlImgIconsSvgDefault = _parcelHelpers.interopDefault(_urlImgIconsSvg);
+require('core-js/stable');
+require('regenerator-runtime/runtime');
+// for polyfilling async-await, provide modern functionality on older browsers that do not natively support it.
+const recipeContainer = document.querySelector('.recipe');
+const timeout = function (s) {
+  return new Promise(function (_, reject) {
+    setTimeout(function () {
+      reject(new Error(`Request took too long! Timeout after ${s} second`));
+    }, s * 1000);
+  });
+};
+// https://forkify-api.herokuapp.com/v2
+// /////////////////////////////////////
+const renderSpinner = function (parentEl) {
+  const markup = `
+    <div class="spinner">
+      <svg>
+        <use href="${_urlImgIconsSvgDefault.default}#icon-loader"></use>
+      </svg>
+    </div>
+  `;
+  parentEl.innerHTML = '';
+  parentEl.insertAdjacentHTML('afterbegin', markup);
+};
+const showRecipe = async function () {
+  try {
+    const id = window.location.hash.slice(1);
+    // preluam query string
+    console.log(id);
+    // daca nu avem id
+    if (!id) return;
+    renderSpinner(recipeContainer);
+    // afiseaza spinner pana primim datele
+    // 1) Loading recipe
+    await _modelJs.loadRecipe(id);
+    // 2) Rendering recipe
+    // render este o metoda
+    _viewRecipeViewDefault.default.render(_modelJs.state.recipe);
+  } catch (err) {
+    // afiseaza eroarea preluata mai sus
+    alert(err);
+  }
+};
+// showRecipe();
+// Event listeners
+['hashchange', 'load'].forEach(ev => window.addEventListener(ev, showRecipe));
